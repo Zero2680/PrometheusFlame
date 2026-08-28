@@ -62,6 +62,29 @@ class Bola(Objeto):
 			if x < 1260:
 				self.x += 1
 
+	def Movimiento_Lluvia(self, enemigo):
+		if self.check_colisiones(enemigo):
+			enemigo.vidas -= 1
+			self.y = -100
+		if self.y < 750:
+			if self.y == -100:
+				self.x = randrange(1, 13) * 100
+			self.y += 0.25
+		if self.y >= 750:
+			self.y = -100
+
+	def Movimiento_Catarata(self, enemigo):
+		global tent
+		if self.check_colisiones(enemigo) == True:
+			enemigo.vidas -= 1
+		if tent != 2:
+			if self.direccionx == 1:
+				self.x += 0.25
+			if self.direccionx == 0:
+				self.x -= 0.25
+		if self.x > 1280 or self.x < 0:
+			tent = 2
+
 def get_font(size):
     return font.Font("menu_assets/font.ttf", size)
 
@@ -69,6 +92,12 @@ cave = transform.scale(image.load("firegame_images/cave.png").convert(), (1280, 
 totem1 = transform.scale(image.load("firegame_images/totem1.png"), (60, 100))
 totem2 = transform.scale(image.load("firegame_images/totem2.png"), (60, 100))
 totem3 = transform.scale(image.load("firegame_images/totem3.png"), (60, 100))
+ball1 = transform.scale(image.load("firegame_images/ball1.png"), (52, 50))
+ball2 = transform.scale(image.load("firegame_images/ball2.png"), (52, 50))
+ball3 = transform.scale(image.load("firegame_images/ball3.png"), (52, 50))
+waterfall1 = transform.scale(image.load("firegame_images/waterfall1.png"), (100, 720))
+waterfall2 = transform.scale(image.load("firegame_images/waterfall2.png"), (100, 720))
+waterfall3 = transform.scale(image.load("firegame_images/waterfall3.png"), (100, 720))
 
 def main_menu():
     while True:
@@ -158,12 +187,68 @@ def options():
 
 def play():
     plataforma = Bola(625, 350, 30, 30, 1, 1, 0, (0,0,255), 100, 0)
+    gota1 = Bola(0, -100, 20, 20, 0, 0, 0, (255, 125, 255), 1, 1)
+    gota2 = Bola(0, -100, 20, 20, 0, 0, 0, (255, 125, 255), 1, 1)
+    catarata1 = Bola(plataforma.x-250, 0, 20, 720, 1, 0, 0, (255,0,0), 1, 1)
+    catarata2 = Bola(plataforma.x-250, 0, 20, 720, 1, 0, 0, (255,0,0), 1, 1)
     timer_plataforma = 0
+    timer_ball = 0
+    timer_catarata = 0
+    timer_catarata2 = 0
+    z = -1
     while True:
+        global tent
+        if z == -1:
+            tent = 0
+            movimiento = False
+            z = 0
         timer_plataforma += 1
+        timer_ball += 1
+        timer_catarata += 1
         screen.blit(cave, (0, 0))
         plataforma.Movimiento()
         plataforma.DibujarObjeto()
+        gota1.Movimiento_Lluvia(plataforma)
+        gota2.Movimiento_Lluvia(plataforma)
+        gota1.DibujarObjeto()
+        gota2.DibujarObjeto()
+
+        if timer_catarata == 5000: movimiento = True
+        if movimiento == False and tent == 2: tent = 0
+        if movimiento == True:
+            timer_catarata2 += 1
+            if tent == 0:
+                catarata1.x = plataforma.x - 200
+                catarata2.x = plataforma.x + 200
+                if plataforma.x < 640:
+                    catarata1.direccionx = 1
+                    catarata2.direccionx = 1
+                if plataforma.x >= 640:
+                    catarata1.direccionx = 0
+                    catarata2.direccionx = 0
+                tent = 1
+            if tent == 2:
+                catarata1.x = 1300
+                catarata2.x = 1300
+                timer_catarata = 0
+                timer_catarata2 = 0
+                movimiento = False
+            catarata1.Movimiento_Catarata(plataforma)
+            catarata2.Movimiento_Catarata(plataforma)
+            catarata1.DibujarObjeto()
+            catarata2.DibujarObjeto()
+            if timer_catarata2 <= 100:
+                screen.blit(waterfall1, (catarata1.x-42.5, catarata1.y))
+                screen.blit(waterfall1, (catarata2.x-42.5, catarata2.y))
+            elif timer_catarata2 <= 200:
+                screen.blit(waterfall2, (catarata1.x-42.5, catarata1.y))
+                screen.blit(waterfall2, (catarata2.x-42.5, catarata2.y))
+            else:
+                screen.blit(waterfall3, (catarata1.x-42.5, catarata1.y))
+                screen.blit(waterfall3, (catarata2.x-42.5, catarata2.y))
+                if timer_catarata2 >= 300:
+                    timer_catarata2 = 0
+
         if timer_plataforma <= 150:
             screen.blit(totem1, (plataforma.x-14, plataforma.y-50))
         elif timer_plataforma <= 300:
@@ -172,6 +257,18 @@ def play():
             screen.blit(totem3, (plataforma.x-14, plataforma.y-50))
             if timer_plataforma >= 450:
                 timer_plataforma = 0
+        if timer_ball <= 150:
+            screen.blit(ball1, (gota1.x-14, gota1.y-25))
+            screen.blit(ball1, (gota2.x-14, gota2.y-25))
+        elif timer_ball <= 300:
+            screen.blit(ball2, (gota1.x-14, gota1.y-25))
+            screen.blit(ball2, (gota2.x-14, gota2.y-25))
+        else:
+            screen.blit(ball3, (gota1.x-14, gota1.y-25))
+            screen.blit(ball3, (gota2.x-14, gota2.y-25))
+            if timer_ball >= 450:
+                timer_ball = 0
+
         display.update()
         for evento in event.get():
             if evento.type == QUIT:
