@@ -88,13 +88,55 @@ class Bola(Objeto):
 
 	def Movimiento_Moneda(self, enemigo):
 		if self.check_colisiones(enemigo) == True:
-			enemigo.puntuacion += 50
+			enemigo.puntuacion += self.puntuacion
 			self.x = 1300
 		self.puntuacion += 1
 		if self.puntuacion == 1:
 			self.x = randrange(1, 13) * 100
 			self.y = randrange(1, 7) * 100
 		if self.puntuacion >= 5000:
+			self.x = 1300
+    
+	def Movimiento_Tornado(self, enemigo):
+		if self.check_colisiones(enemigo) == True:
+			enemigo.vidas -= 1
+			if self.x <= 640:
+				self.x = -1280
+			elif self.x > 640:
+				self.x = 2560
+			if self.y <= 360:
+				self.y = -720
+			elif self.y > 360:
+				self.y = 1440
+		if self.direccionx == 0:
+			self.x -= 0.5
+		if self.direccionx == 1:
+			self.x += 0.5
+		if self.direcciony == 0:
+			self.y -= 0.5
+		if self.direcciony == 1:
+			self.y += 0.5
+		if self.x <= 0:
+			self.direccionx = 1
+		if self.x >= 1260:
+			self.direccionx = 0
+		if self.y <= 0:
+			self.direcciony = 1
+		if self.y >= 700:
+			self.direcciony = 0
+    
+	def Movimiento_Trampa(self, enemigo):
+		if self.puntuacion >= 4500:
+			self.color = (125, 125, 125)
+			if self.check_colisiones(enemigo) == True:
+				enemigo.vidas -= 1
+				self.x = 1300
+		self.puntuacion += 1
+		if self.puntuacion == 1:
+			self.x = randrange(1, 13) * 100
+			self.y = randrange(1, 7) * 100
+		if self.puntuacion >= 5000:
+			self.color = (0, 125, 255)
 			self.x = 1300
 
 def get_font(size):
@@ -120,6 +162,13 @@ coin1 = transform.scale(image.load("prometheusflame_images/coin1.png"), (24, 24)
 coin2 = transform.scale(image.load("prometheusflame_images/coin2.png"), (24, 24))
 coin3 = transform.scale(image.load("prometheusflame_images/coin3.png"), (24, 24))
 coin4 = transform.scale(image.load("prometheusflame_images/coin4.png"), (24, 24))
+twister1 = transform.scale(image.load("prometheusflame_images/twister1.png"), (75, 75))
+twister2 = transform.scale(image.load("prometheusflame_images/twister2.png"), (75, 75))
+twister3 = transform.scale(image.load("prometheusflame_images/twister3.png"), (75, 75))
+tramp1 = transform.scale(image.load("prometheusflame_images/tramp1.png"), (60, 80))
+tramp2 = transform.scale(image.load("prometheusflame_images/tramp2.png"), (60, 80))
+tramp3 = transform.scale(image.load("prometheusflame_images/tramp3.png"), (60, 80))
+tramp4 = transform.scale(image.load("prometheusflame_images/tramp4.png"), (60, 80))
 
 def main_menu():
     while True:
@@ -213,12 +262,15 @@ def play():
     catarata1 = Bola(plataforma.x-250, 0, 20, 720, 1, 0, 0, (255,0,0), 1, 1)
     catarata2 = Bola(plataforma.x-250, 0, 20, 720, 1, 0, 0, (255,0,0), 1, 1)
     moneda1 = Bola(1300, 0, 20, 20, 1, 0, 0, (255, 255, 0), 1, 1)
+    tornado1 = Bola(0, 0, 20, 30, 1, 0, 0, (0, 255, 255), 1, 1)
+    trampa1 = Bola(1300, 0, 40, 40, 1, 0, 0, (0, 125, 255), 1, 1)
     timer_plataforma = 0
     timer_ball = 0
     timer_catarata = 0
     timer_catarata2 = 0
     timer_moneda = 0
     timer_moneda2 = 0
+    timer_tornado = 0
     z = -1
     while True:
         global tent
@@ -241,6 +293,7 @@ def play():
         timer_moneda2 += 1
         if timer_moneda >= 5000:
             moneda1.puntuacion = 0
+            trampa1.puntuacion = 0
             timer_moneda = 0
         moneda1.Movimiento_Moneda(plataforma)
         moneda1.DibujarObjeto()
@@ -254,6 +307,29 @@ def play():
             screen.blit(coin4, (moneda1.x-2, moneda1.y-2))
             if timer_moneda2 >= 600:
                 timer_moneda2 = 0
+
+        timer_tornado += 1
+        tornado1.Movimiento_Tornado(plataforma)
+        tornado1.DibujarObjeto()
+        if timer_tornado <= 150:
+            screen.blit(twister1, (tornado1.x-28, tornado1.y-25))
+        elif timer_tornado <= 300:
+            screen.blit(twister2, (tornado1.x-28, tornado1.y-25))
+        else:
+            screen.blit(twister3, (tornado1.x-28, tornado1.y-25))
+            if timer_tornado >= 450:
+                timer_tornado = 0
+        
+        trampa1.Movimiento_Trampa(plataforma)
+        trampa1.DibujarObjeto()
+        if trampa1.puntuacion <= 4500:
+            screen.blit(tramp1, (trampa1.x-14, trampa1.y-35))
+        elif trampa1.puntuacion <= 4700:
+            screen.blit(tramp2, (trampa1.x-14, trampa1.y-35))
+        elif trampa1.puntuacion <= 4900:
+            screen.blit(tramp3, (trampa1.x-14, trampa1.y-35))
+        elif trampa1.puntuacion <= 5000:
+            screen.blit(tramp4, (trampa1.x-14, trampa1.y-35))
 
         if timer_catarata == 5000: movimiento = True
         if movimiento == False and tent == 2: tent = 0
