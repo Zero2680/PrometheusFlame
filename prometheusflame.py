@@ -64,10 +64,12 @@ class Bola(Objeto):
 
 	def Movimiento_Lluvia(self, enemigo):
 		if self.check_colisiones(enemigo):
+			damage_sound.play()
 			enemigo.vidas -= 1
 			self.y = -100
 		if self.y < 750:
 			if self.y == -100:
+				ball_sound.play()
 				self.x = randrange(1, 13) * 100
 			self.y += 0.25
 		if self.y >= 750:
@@ -76,9 +78,11 @@ class Bola(Objeto):
 	def Movimiento_Catarata(self, enemigo):
 		global tent
 		if self.check_colisiones(enemigo) == True:
+			damage_sound.play()
 			enemigo.vidas -= 1
 			self.x = 1300
 		if tent != 2:
+			catarata_sound.play()
 			if self.direccionx == 1:
 				self.x += 0.25
 			if self.direccionx == 0:
@@ -88,6 +92,7 @@ class Bola(Objeto):
 
 	def Movimiento_Moneda(self, enemigo):
 		if self.check_colisiones(enemigo) == True:
+			coin_sound.play()
 			enemigo.puntuacion += 5000 - self.puntuacion
 			self.x = 1300
 		self.puntuacion += 1
@@ -99,6 +104,7 @@ class Bola(Objeto):
     
 	def Movimiento_Tornado(self, enemigo):
 		if self.check_colisiones(enemigo) == True:
+			damage_sound.play()
 			enemigo.vidas -= 1
 			if self.x <= 640:
 				self.x = -1280
@@ -117,18 +123,24 @@ class Bola(Objeto):
 		if self.direcciony == 1:
 			self.y += 0.5
 		if self.x <= 0:
+			if self.x == 0: tornado_sound.play()
 			self.direccionx = 1
 		if self.x >= 1260:
+			if self.x == 1260: tornado_sound.play()
 			self.direccionx = 0
 		if self.y <= 0:
+			if self.y == 0: tornado_sound.play()
 			self.direcciony = 1
 		if self.y >= 700:
+			if self.y == 700: tornado_sound.play()
 			self.direcciony = 0
     
 	def Movimiento_Trampa(self, enemigo):
 		if self.puntuacion >= 4500:
+			if self.puntuacion == 4500: trampa_sound.play()
 			self.color = (125, 125, 125)
 			if self.check_colisiones(enemigo) == True:
+				damage_sound.play()
 				enemigo.vidas -= 1
 				self.x = 1300
 		self.puntuacion += 1
@@ -171,10 +183,29 @@ tramp3 = transform.scale(image.load("prometheusflame_images/tramp3.png"), (64, 1
 tramp4 = transform.scale(image.load("prometheusflame_images/tramp4.png"), (64, 80))
 tramp5 = transform.scale(image.load("prometheusflame_images/tramp5.png"), (64, 80))
 tramp6 = transform.scale(image.load("prometheusflame_images/tramp6.png"), (64, 80))
+coin_sound = mixer.Sound('prometheusflame_sounds/Moneda.ogg')
+coin_sound.set_volume(0.5)
+ball_sound = mixer.Sound('prometheusflame_sounds/Gota.ogg')
+ball_sound.set_volume(0.0625)
+tornado_sound = mixer.Sound('prometheusflame_sounds/Tornado.ogg')
+tornado_sound.set_volume(0.125)
+trampa_sound = mixer.Sound('prometheusflame_sounds/Trampa.ogg')
+trampa_sound.set_volume(0.0625)
+damage_sound = mixer.Sound('prometheusflame_sounds/Damage.ogg')
+damage_sound.set_volume(0.5)
+catarata_sound = mixer.Sound('prometheusflame_sounds/Catarata.ogg')
+catarata_sound.set_volume(0.03125)
+win_sound = mixer.Sound('prometheusflame_sounds/Win.ogg')
+win_sound.set_volume(0.5)
+draw_sound = mixer.Sound('prometheusflame_sounds/WinLose.ogg')
+draw_sound.set_volume(0.5)
+lose_sound = mixer.Sound('prometheusflame_sounds/Lose.ogg')
+lose_sound.set_volume(0.5)
 
 def main_menu():
     while True:
         #screen.blit(BG, (0, 0))
+        mixer.music.stop()
         screen.fill((0, 0, 0)) 
 
         MENU_MOUSE_POS = mouse.get_pos()
@@ -224,19 +255,27 @@ def options():
 
         screen.fill((0, 0, 0)) 
 
-        OPTIONS_TEXT = get_font(45).render("OPTIONS", True, (178, 64, 182))
+        OPTIONS_TEXT = get_font(45).render("OPTIONS", True, (255, 252, 46))
         OPTIONS_RECT = OPTIONS_TEXT.get_rect(center=(640, 100))
         screen.blit(OPTIONS_TEXT, OPTIONS_RECT)
 
+        MOVE_TEXT = get_font(45).render("WASD : Move", True, (215, 252, 212))
+        MOVE_RECT = MOVE_TEXT.get_rect(center=(640, 200))
+        screen.blit(MOVE_TEXT, MOVE_RECT)
+
         DECREASE_TEXT = get_font(45).render("1 : Decrease Volume", True, (215, 252, 212))
-        DECREASE_RECT = DECREASE_TEXT.get_rect(center=(640, 250))
+        DECREASE_RECT = DECREASE_TEXT.get_rect(center=(640, 300))
         screen.blit(DECREASE_TEXT, DECREASE_RECT)
 
         INCREASE_TEXT = get_font(45).render("2 : Increase Volume", True, (215, 252, 212))
         INCREASE_RECT = INCREASE_TEXT.get_rect(center=(640, 400))
         screen.blit(INCREASE_TEXT, INCREASE_RECT)
 
-        OPTIONS_BACK = Button(image=None, pos=(640, 550), 
+        FUN_TEXT = get_font(45).render("Have fun! :)", True, (255, 252, 46))
+        FUN_RECT = FUN_TEXT.get_rect(center=(640, 500))
+        screen.blit(FUN_TEXT, FUN_RECT)
+
+        OPTIONS_BACK = Button(image=None, pos=(640, 600), 
                             text_input="BACK", font=get_font(75), base_color=(215, 252, 212), hovering_color=(255, 255, 255))
 
         OPTIONS_BACK.changeColor(OPTIONS_MOUSE_POS)
@@ -250,9 +289,9 @@ def options():
                 if OPTIONS_BACK.checkForInput(OPTIONS_MOUSE_POS):
                     main_menu()
             if evento.type==KEYDOWN:
-                if evento.key == K_1 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_1 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() - 0.1)
-                if evento.key == K_2 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_2 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() + 0.1)
 
         display.update()
@@ -297,6 +336,10 @@ def play():
     while True:
         global tent
         if z == -1:
+            mixer.music.set_volume(0.25)
+            mixer.music.load('prometheusflame_sounds/Musica.ogg')
+            mixer.music.set_volume(mixer.music.get_volume())
+            mixer.music.play(-1)
             tent = 0
             movimiento = False
             z = 0
@@ -634,16 +677,17 @@ def play():
                 quit()
                 exit()
             if evento.type==KEYDOWN:
-                if evento.key == K_1 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_1 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() - 0.1)
-                if evento.key == K_2 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_2 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() + 0.1)
                 if evento.key == K_ESCAPE:
-                    quit()
-                    exit()
+                    main_menu()
 
 def final(score):
+    sound = False
     while True:
+        mixer.music.stop()
         SCORE_MOUSE_POS = mouse.get_pos()
 
         FS_TEXT = get_font(45).render("FINAL SCORE:", True, (255, 252, 46))
@@ -655,14 +699,23 @@ def final(score):
         screen.blit(SCORE_TEXT, SCORE_RECT)
 
         if score < 100000:
+            if sound == False:
+                lose_sound.play()
+                sound = True
             SENTENCE_TEXT = get_font(45).render("That's a terrible score", True, (255, 252, 46))
             SENTENCE_RECT = SENTENCE_TEXT.get_rect(center=(640, 300))
             screen.blit(SENTENCE_TEXT, SENTENCE_RECT)
         elif score < 200000:
+            if sound == False:
+                draw_sound.play()
+                sound = True
             SENTENCE_TEXT = get_font(45).render("Nice! You're pretty good!", True, (255, 252, 46))
             SENTENCE_RECT = SENTENCE_TEXT.get_rect(center=(640, 300))
             screen.blit(SENTENCE_TEXT, SENTENCE_RECT)
         else:
+            if sound == False:
+                win_sound.play()
+                sound = True
             SENTENCE_TEXT = get_font(45).render('Wow! You’re in the top 10%', True, (255, 252, 46))
             SENTENCE_RECT = SENTENCE_TEXT.get_rect(center=(640, 300))
             screen.blit(SENTENCE_TEXT, SENTENCE_RECT)
@@ -689,9 +742,9 @@ def final(score):
                 if SCORE_BACK.checkForInput(SCORE_MOUSE_POS):
                     main_menu()
             if evento.type==KEYDOWN:
-                if evento.key == K_1 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_1 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() - 0.1)
-                if evento.key == K_2 and mixer.music.get_volume() > 0.0:
+                if evento.key == K_2 and mixer.music.get_volume() >= 0.0:
                     mixer.music.set_volume(mixer.music.get_volume() + 0.1)
                 if evento.key == K_ESCAPE:
                     quit()
