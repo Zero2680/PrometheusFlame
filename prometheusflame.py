@@ -3,8 +3,10 @@ init()
 from random import *
 from button import Button
 screen = display.set_mode((1280, 720), FULLSCREEN)
-display.set_caption('Fire Game')
+display.set_caption('Prometheus Flame')
 screen.fill((0, 0, 0)) 
+icono = image.load("prometheusflame_images/icono_prometheusflame.png")
+display.set_icon(icono)
 
 class Objeto(sprite.Sprite):
 	def __init__(self, x, y, ancho, largo, direccionx, direcciony, puntuacion, color, vidas, team):
